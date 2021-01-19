@@ -9,6 +9,7 @@ body {
   --recognizing-color: gray;
   --recognized-color: black;
   --text-font-size: 34px;
+  --block-height: 44px;
   --text-font-weight: 800;
 }
           
@@ -16,11 +17,19 @@ body {
   height: 0px;
   opacity: 0;
   list-style-type: none;
+  font-size: var(--text-font-size);
+  font-weight: var(--text-font-weight);
+  text-shadow:
+        2px 0 0 white,
+        0 2px 0 white,
+        -2px 0 0 white,
+        0 -2px 0 white;
   animation: popText 1s linear 0s 1 reverse;
 }
           
 .recognized-body {
   list-style-type: none;
+  height: var(--block-height);
   font-size: var(--text-font-size);
   font-weight: var(--text-font-weight);
   text-shadow:
@@ -33,6 +42,7 @@ body {
 
 .recognizing-body {
   list-style-type: none;
+  height: var(--block-height);
   color: var(--recognizing-color);
   font-size: var(--text-font-size);
   font-weight: var(--text-font-weight);
@@ -48,12 +58,12 @@ body {
   0% {
     opacity: 0;
     height: 0px;
-    transform: translateY(-30px);
+    transform: translateY(calc(-1 * var(--block-height)));
   }
   100% {
     opacity: 1.0;
-    height: var(--text-font-size);
-    transform: translateY(-30px);
+    height: var(--block-height);
+    transform: translateY(0px);
   }
 }
 
@@ -92,7 +102,7 @@ body {
             recognition.continuous = true;
         
             const parent = document.querySelector('#result');
-            const num_active_line = 2;
+            const num_active_line = 1;
         
             try {
                 recognition.onresult = (event) => {
