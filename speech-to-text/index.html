@@ -12,10 +12,7 @@ body {
   --block-height: 44px;
   --text-font-weight: 800;
 }
-
-#result {
-    overflow-x: hidden;
-}
+          
 .poped-body {
   height: 0px;
   opacity: 0;
@@ -98,45 +95,52 @@ body {
         <ul id="result"></ul>
     
         <script>  
-            SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
-            let recognition = new SpeechRecognition();
-            recognition.lang = 'ja-JP';
-            recognition.interimResults = true;
-            recognition.continuous = true;
-        
             const parent = document.querySelector('#result');
             const num_active_line = 3;
         
-            try {
-                recognition.onresult = (event) => {
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    let transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        let recognized_text = parent.lastElementChild;
-                        recognized_text.className = 'recognized-body'; 
-                        recognized_text.textContent = transcript;
-                        // 数が多い場合は消す
-                        while (parent.hasChildNodes() && document.querySelectorAll('.recognized-body').length > num_active_line) {
-                          parent.firstElementChild.className = 'poped-body';
-                          setTimeout( () => {parent.removeChild(parent.firstElementChild)}, 1500);
-                        }
-                    } else {
-                        let recognized_text = parent.lastElementChild;
-                        // リストの最後の要素が確定しているようだったら次のを作る
-                        if (recognized_text == null || recognized_text.className == 'recognized-body') {
-                            recognized_text = document.createElement('li');
-                            recognized_text.className = 'recognizing-body'; 
-                            parent.appendChild(recognized_text);
-                        } 
-                        recognized_text.textContent = transcript;
-                    }
+          const display_text = (event) => {
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              let transcript = event.results[i][0].transcript;
+              if (event.results[i].isFinal) {
+                let recognized_text = parent.lastElementChild;
+                recognized_text.className = 'recognized-body'; 
+                recognized_text.textContent = transcript;
+                // 数が多い場合は消す
+                while (parent.hasChildNodes() && document.querySelectorAll('.recognized-body').length > num_active_line) {
+                  parent.firstElementChild.className = 'poped-body';
+                  setTimeout( () => {parent.removeChild(parent.firstElementChild)}, 1500);
                 }
+              } else {
+                let recognized_text = parent.lastElementChild;
+                // リストの最後の要素が確定しているようだったら次のを作る
+                if (recognized_text == null || recognized_text.className == 'recognized-body') {
+                  recognized_text = document.createElement('li');
+                  recognized_text.className = 'recognizing-body'; 
+                  parent.appendChild(recognized_text);
+                } 
+                recognized_text.textContent = transcript;
+              }
             }
-                recognition.start();
-            } catch (err) {
-                recognition.stop();  
-                recognition.start();  
-            }
+          }
+          
+          SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+          let recognition = new SpeechRecognition();
+          recognition.lang = 'ja-JP';
+          recognition.interimResults = true;
+          recognition.continuous = true;
+        	recognition.onresult = display_text
+          
+        	recognition.onend = (event) => {
+            SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+            recognition = new SpeechRecognition();
+          	recognition.lang = 'ja-JP';
+          	recognition.interimResults = true;
+          	recognition.continuous = true;
+        		recognition.onresult = display_text
+            recognition.start();
+          }
+          
+          recognition.start();
         </script>
     </body>    
 </html>
