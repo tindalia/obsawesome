@@ -1,14 +1,23 @@
 <html>
     <head>
         <style type="text/css">
+body {
+    background-color: green;
+}
+
 :root {
-  --recognizing-color: lightgray;
+  --recognizing-color: gray;
   --recognized-color: black;
-  --text-font-size: 17px;
+  --text-font-size: 34px;
+  --text-font-weight: 800px;
 }
           
 .poped-body {
-  font-size: 0px;
+  text-shadow:
+        2px 0 0 white,
+        0 2px 0 white,
+        -2px 0 0 white,
+        0 -2px 0 white;
   list-style-type: none;
   animation: popText 1s linear 0s 1 reverse;
 }
@@ -16,6 +25,12 @@
 .recognized-body {
   list-style-type: none;
   font-size: var(--text-font-size);
+  font-weight: var(--text-font-weight);
+  text-shadow:
+        2px 0 0 white,
+        0 2px 0 white,
+        -2px 0 0 white,
+        0 -2px 0 white;
   animation: finalizeText 1s linear 0s 1;
 }
 
@@ -23,6 +38,12 @@
   list-style-type: none;
   color: var(--recognizing-color);
   font-size: var(--text-font-size);
+  font-weight: var(--text-font-weight);
+  text-shadow:
+        2px 0 0 white,
+        0 2px 0 white,
+        -2px 0 0 white,
+        0 -2px 0 white;
   animation: fadeIn 1s ease-out 0s 1;
 }
           
