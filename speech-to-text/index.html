@@ -1,0 +1,162 @@
+<html>
+    <head>
+        <style type="text/css">
+body {
+    background-color: #00ff00;
+}
+
+:root {
+  --recognizing-color: gray;
+  --recognized-color: black;
+  --text-font-size: 34px;
+  --block-height: 44px;
+  --text-font-weight: 800;
+}
+            
+#result {
+    overflow-x: hidden;
+}
+          
+.poped-body {
+  height: 0px;
+  opacity: 0;
+  list-style-type: none;
+  font-size: var(--text-font-size);
+  font-weight: var(--text-font-weight);
+  text-shadow:
+        2px 0 0 white,
+        0 2px 0 white,
+        -2px 0 0 white,
+        0 -2px 0 white;
+  animation: popText 1s linear 0s 1 reverse;
+}
+          
+.recognized-body {
+  list-style-type: none;
+  height: var(--block-height);
+  font-size: var(--text-font-size);
+  font-weight: var(--text-font-weight);
+  text-shadow:
+        2px 0 0 white,
+        0 2px 0 white,
+        -2px 0 0 white,
+        0 -2px 0 white;
+  animation: finalizeText 1s linear 0s 1;
+}
+
+.recognizing-body {
+  list-style-type: none;
+  height: var(--block-height);
+  color: var(--recognizing-color);
+  font-size: var(--text-font-size);
+  font-weight: var(--text-font-weight);
+  text-shadow:
+        2px 0 0 white,
+        0 2px 0 white,
+        -2px 0 0 white,
+        0 -2px 0 white;
+  animation: fadeIn 1s ease-out 0s 1;
+}
+          
+@keyframes popText {
+  0% {
+    opacity: 0;
+    height: 0px;
+    transform: translateY(calc(-1 * var(--block-height)));
+  }
+  100% {
+    opacity: 1.0;
+    height: var(--block-height);
+    transform: translateY(0px);
+  }
+}
+
+@keyframes finalizeText {
+  0% {
+    color: var(--recognizing-color);
+  }
+  100% {
+    color: var(--recognized-color);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+        </style>
+    </head>
+    <body>
+        <ul id="result"></ul>
+        <script>    
+          function recognition(display_text){
+          	return new Promise(resolve => {
+          		SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+              let recognition = new SpeechRecognition();
+              recognition.lang = 'ja-JP';
+              recognition.interimResults = true;
+              recognition.continuous = true;
+              recognition.onresult = display_text;
+              recognition.onaudiostart = (event) => {
+                console.log('Connect analyze service');
+              }
+              recognition.onerror = (e) => {
+                resolve('');
+                console.log(e);
+              }
+              recognition.onspeechend = (event) => {
+                resolve('');
+                console.log('onspeechend');
+              }
+              recognition.start();
+            })
+          }
+          
+          async function recognition_loop(){
+            const display_text = (event) => {
+              const parent = document.querySelector('#result');
+              const num_active_line = 3;
+
+              for (let i = event.resultIndex; i < event.results.length; i++) {
+                let transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                  let recognized_text = parent.lastElementChild;
+                  recognized_text.className = 'recognized-body'; 
+                  recognized_text.textContent = transcript;
+                  // 数が多い場合は消す
+                  while (parent.hasChildNodes() && document.querySelectorAll('.recognized-body').length > num_active_line) {
+                    parent.firstElementChild.className = 'poped-body';
+                    setTimeout( () => {parent.removeChild(parent.firstElementChild)}, 1500);
+                  }
+                } else {
+                  let recognized_text = parent.lastElementChild;
+                  // リストの最後の要素が確定しているようだったら次のを作る
+                  if (recognized_text == null || recognized_text.className == 'recognized-body') {
+                    recognized_text = document.createElement('li');
+                    recognized_text.className = 'recognizing-body'; 
+                    parent.appendChild(recognized_text);
+                  } 
+                  recognized_text.textContent = transcript;
+                }
+              }
+            }
+            
+            while(true){
+            	await recognition(display_text);
+              console.log('Next analyze service');  
+            }
+          }
+
+          recognition_loop();
+        </script>
+    </body>    
+</html>
