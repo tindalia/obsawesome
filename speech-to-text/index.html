@@ -98,65 +98,73 @@ body {
     <body>
         <ul id="result"></ul>
         <script>    
-          function recognition(display_text){
-          	return new Promise(resolve => {
-          		SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
-              let recognition = new SpeechRecognition();
-              recognition.lang = 'ja-JP';
-              recognition.interimResults = true;
-              recognition.continuous = true;
-              recognition.onresult = display_text;
-              recognition.onaudiostart = (event) => {
-                console.log('Connect analyze service');
-              }
-              recognition.onerror = (e) => {
-                resolve('');
-                console.log(e);
-              }
-              recognition.onspeechend = (event) => {
-                resolve('');
-                console.log('onspeechend');
-              }
-              recognition.start();
-            })
-          }
+            function recognition(display_text){
+          	    return new Promise(resolve => {
+          		    SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+               
+                    let recognition = new SpeechRecognition();
+                    recognition.lang = 'ja-JP';
+                    recognition.interimResults = true;
+                    recognition.continuous = true;
+                    recognition.onresult = display_text;
+                    
+                    recognition.onaudiostart = (event) => {
+                        console.log('Connect analyze service');
+                    }
+                    recognition.onerror = (e) => {
+                        resolve(e);
+                        console.error(e);
+                    }
+                    recognition.onspeechend = (event) => {
+                        resolve(event);
+                        console.log('onspeechend');
+                    }
+                    recognition.start();
+                })
+            }
           
-          async function recognition_loop(){
-            const display_text = (event) => {
-              const parent = document.querySelector('#result');
-              const num_active_line = 3;
+            async function recognition_loop(){
+                const display_text = (event) => {
+                    const parent = document.querySelector('#result');
+                    const num_active_line = 3;
 
-              for (let i = event.resultIndex; i < event.results.length; i++) {
-                let transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                  let recognized_text = parent.lastElementChild;
-                  recognized_text.className = 'recognized-body'; 
-                  recognized_text.textContent = transcript;
-                  // 数が多い場合は消す
-                  while (parent.hasChildNodes() && document.querySelectorAll('.recognized-body').length > num_active_line) {
-                    parent.firstElementChild.className = 'poped-body';
-                    setTimeout( () => {parent.removeChild(parent.firstElementChild)}, 1500);
-                  }
-                } else {
-                  let recognized_text = parent.lastElementChild;
-                  // リストの最後の要素が確定しているようだったら次のを作る
-                  if (recognized_text == null || recognized_text.className == 'recognized-body') {
-                    recognized_text = document.createElement('li');
-                    recognized_text.className = 'recognizing-body'; 
-                    parent.appendChild(recognized_text);
-                  } 
-                  recognized_text.textContent = transcript;
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        let transcript = event.results[i][0].transcript;
+                  
+                        if (event.results[i].isFinal) {
+                            let recognized_text = parent.lastElementChild;
+                            
+                            recognized_text.className = 'recognized-body'; 
+                            recognized_text.textContent = transcript;
+
+                            // 規定の表示数を超えた場合は消す
+                            while (parent.hasChildNodes() && document.querySelectorAll('.recognized-body').length > num_active_line) {
+                                parent.firstElementChild.className = 'poped-body';
+                                setTimeout( () => {parent.removeChild(parent.firstElementChild)}, 1500);
+                            }
+
+                        } else {
+                            let recognized_text = parent.lastElementChild;
+                            
+                            // リストの最後の要素が確定しているようだったら次のリストアイテムを追加する
+                            if (recognized_text == null || recognized_text.className == 'recognized-body') {
+                                recognized_text = document.createElement('li');
+                                recognized_text.className = 'recognizing-body'; 
+                                parent.appendChild(recognized_text);
+                            } 
+                            
+                            recognized_text.textContent = transcript;
+                        }
+                    }
                 }
-              }
-            }
             
-            while(true){
-            	await recognition(display_text);
-              console.log('Next analyze service');  
+                while(true){
+                	await recognition(display_text);
+                    console.log('Will re connect to analyze service');  
+                }
             }
-          }
 
-          recognition_loop();
+            recognition_loop();
         </script>
     </body>    
 </html>
